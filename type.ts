@@ -29,8 +29,10 @@ type PickOne<T, K extends keyof T> = { [key in K]: T[key] };
 type ExcludeOne<T, K extends keyof T> = { [key in Exclude<keyof T, K>]: T[key] };
 // type UppercaseKeys<T ,T0 = {[K in keyof T]: ToUppercase<K>},T1 = SwitchKeyValue<T0>,T2 = {[K in keyof T1]: T[ToLowerCase<K>]}> = T2;
 
-type UppercaseType<T> = {[K in ToUppercase<keyof T>]: T[ToLowerCase<K>] };
+//获取索引签名 key
+type InferTypeKey<T,K,K1 = ToLowerCase<K>> = K1 extends keyof T ? T[K1] : never
 
+type UppercaseType<T> = {[K in ToUppercase<keyof T>]: InferTypeKey<T,K> };
 
 type S6 = PickOne<Student, 'age'>;
 type S7 = ExcludeOne<Student, 'age'>;
@@ -44,6 +46,21 @@ type S12 = GetKeyType<Student, 'age'>;
 const a: S8 = 'age';
 const b: S9 = 'length';
 
+
+type PromiseType<T> = (args: any[]) => Promise<T>;
+async function stringPromise() {
+  return "string promise";
+}
+type stringPromiseReturnType = ReturnType<typeof stringPromise>; // Promise<string>
+//通过infer反解出类型
+type UnPromisify<T> = T extends PromiseType<infer U> ? U : never;
+type extractStringPromise = UnPromisify<typeof stringPromise>; // string
+
+//解析参数数组的类型
+type VariadicFn<A extends any[]> = (...args: A) => any;
+type ArgsType<T> = T extends VariadicFn<infer A> ? A : never;
+type Fn = (a: number, b: string) => string;
+type Fn2Args = ArgsType<Fn>; // [number, string]
 
 
 type LowerToUpperToLowerCaseMapper = {
